@@ -85,10 +85,16 @@ server {
 }
 EOF
 
-# Удаление старых символических ссылок
+# Удаление некорректных символических ссылок
+if [ -L "/etc/nginx/sites-enabled/$DOMAIN" ]; then
+  echo "Удаляем некорректную символическую ссылку /etc/nginx/sites-enabled/$DOMAIN"
+  rm -f "/etc/nginx/sites-enabled/$DOMAIN"
+fi
 if [ -L "/etc/nginx/sites-enabled/$DOMAIN.conf" ]; then
   rm -f "/etc/nginx/sites-enabled/$DOMAIN.conf"
 fi
+
+# Создание новой символической ссылки
 ln -s "$NGINX_CONF" "/etc/nginx/sites-enabled/$DOMAIN.conf"
 
 # Проверка конфигурации Nginx
