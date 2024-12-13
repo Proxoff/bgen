@@ -106,6 +106,11 @@ if [ -e "/etc/nginx/sites-enabled/$DOMAIN.conf" ]; then
   rm -f "/etc/nginx/sites-enabled/$DOMAIN.conf"
 fi
 
+if [ -d "/etc/nginx/sites-enabled/sites-available" ]; then
+  echo "Ошибка: директория /etc/nginx/sites-enabled/sites-available обнаружена. Удаляем её..."
+  rm -rf "/etc/nginx/sites-enabled/sites-available"
+fi
+
 # Создание символической ссылки
 ln -s "$NGINX_CONF" "/etc/nginx/sites-enabled/$DOMAIN.conf"
 
@@ -117,7 +122,6 @@ fi
 
 # Перезапуск Nginx
 systemctl restart nginx
-
 
 # Настройка SSL
 SSL_CERT_PATH="/etc/ssl/$DOMAIN"
