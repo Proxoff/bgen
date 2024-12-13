@@ -9,6 +9,12 @@ fi
 # Запрос домена
 read -p "Введите имя домена: " DOMAIN
 
+# Проверка, что домен введён
+if [ -z "$DOMAIN" ]; then
+  echo "Ошибка: Имя домена не указано. Завершение скрипта."
+  exit 1
+fi
+
 # Установка необходимых пакетов
 apt update
 apt install -y nginx docker.io docker-compose
