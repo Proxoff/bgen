@@ -55,10 +55,10 @@ docker-compose up -d || { echo "Ошибка запуска контейнера
 NGINX_CONF="/etc/nginx/sites-available/$DOMAIN.conf"
 if [ -f "$NGINX_CONF" ]; then
   echo "Конфигурация $NGINX_CONF уже существует. Удаляем её..."
-  rm -f $NGINX_CONF
+  rm -f "$NGINX_CONF"
 fi
 
-cat <<EOF > $NGINX_CONF
+cat <<EOF > "$NGINX_CONF"
 server {
     listen 80;
     server_name $DOMAIN;
@@ -87,9 +87,9 @@ EOF
 
 # Удаление старых символических ссылок
 if [ -L "/etc/nginx/sites-enabled/$DOMAIN.conf" ]; then
-  rm -f /etc/nginx/sites-enabled/$DOMAIN.conf
+  rm -f "/etc/nginx/sites-enabled/$DOMAIN.conf"
 fi
-ln -s $NGINX_CONF /etc/nginx/sites-enabled/$DOMAIN.conf
+ln -s "$NGINX_CONF" "/etc/nginx/sites-enabled/$DOMAIN.conf"
 
 # Проверка конфигурации Nginx
 nginx -t || exit 1
@@ -99,9 +99,9 @@ systemctl restart nginx
 
 # Настройка SSL
 SSL_CERT_PATH="/etc/ssl/$DOMAIN"
-mkdir -p $SSL_CERT_PATH
+mkdir -p "$SSL_CERT_PATH"
 
-cat <<SSL_UPDATE >> $NGINX_CONF
+cat <<SSL_UPDATE >> "$NGINX_CONF"
 
 server {
     listen 443 ssl;
