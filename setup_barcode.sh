@@ -14,6 +14,11 @@ apt update
 apt install -y nginx docker.io docker-compose
 
 # Создание директории для приложения
+if [ -d "/usr/apps/barcode" ]; then
+  echo "Папка /usr/apps/barcode уже существует. Удаляем её..."
+  rm -rf /usr/apps/barcode
+fi
+
 mkdir -p /usr/apps/barcode
 cd /usr/apps/barcode
 
@@ -21,6 +26,11 @@ cd /usr/apps/barcode
 if ! git clone https://github.com/Proxoff/barcode_generator .; then
   echo "Ошибка: Не удалось клонировать репозиторий."
   exit 1
+fi
+
+# Добавление gunicorn в зависимости
+if ! grep -q "gunicorn" requirements.txt; then
+  echo "gunicorn" >> requirements.txt
 fi
 
 # Сборка Docker-контейнера
@@ -39,11 +49,14 @@ services:
 EOF
 
 # Запуск Docker-контейнера
-docker-compose up -d
+docker-compose up -d || { echo "Ошибка запуска контейнера"; exit 1; }
 
 # Настройка Nginx
 NGINX_CONF=/etc/nginx/sites-available/$DOMAIN
-ln -s $NGINX_CONF /etc/nginx/sites-enabled/
+if [ -f "$NGINX_CONF" ]; then
+  echo "Конфигурация $NGINX_CONF уже существует. Удаляем её..."
+  rm -f $NGINX_CONF
+fi
 
 cat <<EOF > $NGINX_CONF
 server {
@@ -71,6 +84,8 @@ server {
     }
 }
 EOF
+
+ln -sf $NGINX_CONF /etc/nginx/sites-enabled/
 
 # Проверка конфигурации Nginx
 nginx -t || exit 1
