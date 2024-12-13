@@ -90,23 +90,34 @@ server {
 }
 EOF
 
-# Удаление некорректных символических ссылок
+# Удаление старых и некорректных ссылок
 if [ -L "/etc/nginx/sites-enabled/$DOMAIN" ]; then
   echo "Удаляем некорректную символическую ссылку /etc/nginx/sites-enabled/$DOMAIN"
   rm -f "/etc/nginx/sites-enabled/$DOMAIN"
 fi
+
 if [ -L "/etc/nginx/sites-enabled/$DOMAIN.conf" ]; then
+  echo "Удаляем старую ссылку /etc/nginx/sites-enabled/$DOMAIN.conf"
   rm -f "/etc/nginx/sites-enabled/$DOMAIN.conf"
 fi
 
-# Создание новой символической ссылки
+if [ -e "/etc/nginx/sites-enabled/$DOMAIN.conf" ]; then
+  echo "Ошибка: в /etc/nginx/sites-enabled уже существует файл $DOMAIN.conf, но он не является ссылкой. Удаляем файл."
+  rm -f "/etc/nginx/sites-enabled/$DOMAIN.conf"
+fi
+
+# Создание символической ссылки
 ln -s "$NGINX_CONF" "/etc/nginx/sites-enabled/$DOMAIN.conf"
 
 # Проверка конфигурации Nginx
-nginx -t || exit 1
+if ! nginx -t; then
+  echo "Ошибка: проверка конфигурации Nginx не удалась."
+  exit 1
+fi
 
 # Перезапуск Nginx
 systemctl restart nginx
+
 
 # Настройка SSL
 SSL_CERT_PATH="/etc/ssl/$DOMAIN"
