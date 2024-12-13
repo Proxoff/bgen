@@ -52,7 +52,7 @@ EOF
 docker-compose up -d || { echo "Ошибка запуска контейнера"; exit 1; }
 
 # Настройка Nginx
-NGINX_CONF=/etc/nginx/sites-available/$DOMAIN
+NGINX_CONF=/etc/nginx/sites-available/$DOMAIN.conf
 if [ -f "$NGINX_CONF" ]; then
   echo "Конфигурация $NGINX_CONF уже существует. Удаляем её..."
   rm -f $NGINX_CONF
@@ -85,7 +85,11 @@ server {
 }
 EOF
 
-ln -sf $NGINX_CONF /etc/nginx/sites-enabled/
+# Удаление старых символических ссылок
+if [ -L "/etc/nginx/sites-enabled/$DOMAIN.conf" ]; then
+  rm -f /etc/nginx/sites-enabled/$DOMAIN.conf
+fi
+ln -s $NGINX_CONF /etc/nginx/sites-enabled/
 
 # Проверка конфигурации Nginx
 nginx -t || exit 1
