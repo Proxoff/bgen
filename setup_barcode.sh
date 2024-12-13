@@ -6,8 +6,10 @@ if [ "$EUID" -ne 0 ]; then
   exit
 fi
 
-# Запрос домена
-read -p "Введите имя домена: " DOMAIN
+# Проверка и ввод домена
+if [ -z "$DOMAIN" ]; then
+  read -p "Введите имя домена: " DOMAIN
+fi
 
 # Проверка, что домен введён
 if [ -z "$DOMAIN" ]; then
